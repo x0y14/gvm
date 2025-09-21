@@ -2,15 +2,8 @@ package program
 
 import "fmt"
 
-type Label interface {
-	Word
-	isLabel()
+type Label int
+
+func (l Label) String() string {
+	return fmt.Sprintf("label(%d)", l)
 }
-
-type AbstractIndex int
-
-func (a *AbstractIndex) String() string {
-	return fmt.Sprintf("label(%d)", *a)
-}
-
-func (a *AbstractIndex) isLabel() {}
