@@ -1,4 +1,4 @@
-package program
+package gvm
 
 import "fmt"
 
