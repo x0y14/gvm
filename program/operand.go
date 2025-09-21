@@ -67,7 +67,9 @@ const (
 )
 
 func (f FlagRegister) String() string {
-	return []string{}[f]
+	return []string{
+		ZF: "zf",
+	}[f]
 }
 func (f FlagRegister) isOperand()  {}
 func (f FlagRegister) isRegister() {}
