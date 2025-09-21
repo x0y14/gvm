@@ -4,7 +4,6 @@ type Opcode int
 
 const (
 	NOP Opcode = iota
-	EXIT
 
 	MOV
 
@@ -34,7 +33,6 @@ const (
 func (op Opcode) String() string {
 	return []string{
 		NOP:   "nop",
-		EXIT:  "exit",
 		MOV:   "mov",
 		PUSH:  "push",
 		POP:   "pop",
@@ -58,7 +56,6 @@ func (op Opcode) String() string {
 func (op Opcode) NumOperands() int {
 	return []int{
 		NOP:   0,
-		EXIT:  0,
 		MOV:   2,
 		PUSH:  1,
 		POP:   1,
