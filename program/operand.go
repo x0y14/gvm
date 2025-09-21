@@ -114,3 +114,50 @@ func (b Bool) String() string {
 }
 func (b Bool) isOperand()          {}
 func (b Bool) Type() PrimitiveType { return TBool }
+
+type Location interface {
+	Word
+	isOperand()
+	isLocation()
+}
+
+// Offset Relative Location
+type Offset interface {
+	Location
+	isOffset()
+}
+
+type BpOffset int
+
+func (b BpOffset) String() string {
+	var op = ""
+	if b >= 0 {
+		op = "+"
+	}
+	return fmt.Sprintf("[bp%s%d]", op, b)
+}
+func (b BpOffset) isOperand()  {}
+func (b BpOffset) isLocation() {}
+func (b BpOffset) isOffset()   {}
+
+type SpOffset int
+
+func (s SpOffset) String() string {
+	var op = ""
+	if s >= 0 {
+		op = "+"
+	}
+	return fmt.Sprintf("[sp%s%d]", op, s)
+}
+func (s SpOffset) isOperand()  {}
+func (s SpOffset) isLocation() {}
+func (s SpOffset) isOffset()   {}
+
+// Address Abstract Location
+type Address int
+
+func (a Address) String() string {
+	return fmt.Sprintf("@%d", a)
+}
+func (a Address) isOperand()  {}
+func (a Address) isLocation() {}
