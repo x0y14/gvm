@@ -127,5 +127,4 @@ func (r *Runtime) do() error {
 	default:
 		return fmt.Errorf("unsupported word: %s", word.String())
 	}
-	return nil
 }
