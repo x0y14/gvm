@@ -90,6 +90,9 @@ func (r *Runtime) do() error {
 	switch word := r.program[r.pc()].(type) {
 	case Opcode:
 		switch word {
+		case NOP:
+			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
+			return nil
 		case PUSH:
 			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
 			src, ok := r.program[r.pc()+1].(Operand)
