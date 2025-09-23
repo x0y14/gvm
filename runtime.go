@@ -108,9 +108,9 @@ func (r *Runtime) do() error {
 			if !ok {
 				return fmt.Errorf("invalid pop dst: want=operand, got=%s", word.String())
 			}
-			switch dst.(type) {
+			switch dst := dst.(type) {
 			case Register:
-				r.registers[dst.(Register)] = r.pop()
+				r.registers[dst] = r.pop()
 				return nil
 			default:
 				return fmt.Errorf("invalid pop dst: %s", word.String())
