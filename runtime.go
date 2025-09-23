@@ -19,10 +19,10 @@ type Runtime struct {
 func NewRuntime(program Program, config *Config) *Runtime {
 	regs := map[Register]Operand{
 		// Specials
-		PC: Integer(0),
-		BP: Integer(0),
-		SP: Integer(0),
-		HP: Integer(0),
+		PC: ProgramAddress(0),
+		BP: BasePointer(0),
+		SP: StackPointer(config.StackSize - 1),
+		HP: HeapAddress(0),
 		// GeneralPurposes
 		R1:   nil,
 		R2:   nil,
@@ -30,7 +30,7 @@ func NewRuntime(program Program, config *Config) *Runtime {
 		ACM1: nil,
 		ACM2: nil,
 		// Flags
-		ZF: Integer(0),
+		ZF: Bool(false),
 	}
 	return &Runtime{
 		program:   program,
@@ -56,17 +56,17 @@ func (r *Runtime) set(reg Register, operand Operand) {
 	r.registers[reg] = operand
 }
 
-func (r *Runtime) pc() Integer {
-	return r.registers[PC].(Integer)
+func (r *Runtime) pc() ProgramAddress {
+	return r.registers[PC].(ProgramAddress)
 }
-func (r *Runtime) bp() Integer {
-	return r.registers[BP].(Integer)
+func (r *Runtime) bp() BasePointer {
+	return r.registers[BP].(BasePointer)
 }
-func (r *Runtime) sp() Integer {
-	return r.registers[SP].(Integer)
+func (r *Runtime) sp() StackPointer {
+	return r.registers[SP].(StackPointer)
 }
-func (r *Runtime) hp() Integer {
-	return r.registers[HP].(Integer)
+func (r *Runtime) hp() HeapAddress {
+	return r.registers[HP].(HeapAddress)
 }
 
 func (r *Runtime) push(operand Operand) {
@@ -88,7 +88,7 @@ func (r *Runtime) do() error {
 	case Opcode:
 		switch word {
 		case PUSH:
-			defer func() { r.set(PC, r.pc()+1+Integer(word.NumOperands())) }()
+			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
 			src, ok := r.program[r.pc()+1].(Operand)
 			if !ok {
 				return fmt.Errorf("invalid push src: want=operand, got=%s", word.String())
@@ -103,7 +103,7 @@ func (r *Runtime) do() error {
 				return fmt.Errorf("unsupported push src: %s", src.String())
 			}
 		case POP:
-			defer func() { r.set(PC, r.pc()+1+Integer(word.NumOperands())) }()
+			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
 			dst, ok := r.program[r.pc()+1].(Operand)
 			if !ok {
 				return fmt.Errorf("invalid pop dst: want=operand, got=%s", word.String())

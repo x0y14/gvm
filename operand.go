@@ -176,3 +176,21 @@ func (h HeapAddress) String() string {
 func (h HeapAddress) isOperand()  {}
 func (h HeapAddress) isLocation() {}
 func (h HeapAddress) isAddress()  {}
+
+type Pointer interface {
+	Location
+	isPointer()
+}
+type BasePointer int
+
+func (b BasePointer) String() string { return fmt.Sprintf("@%d", b) }
+func (b BasePointer) isOperand()     {}
+func (b BasePointer) isLocation()    {}
+func (b BasePointer) isPointer()     {}
+
+type StackPointer int
+
+func (s StackPointer) String() string { return fmt.Sprintf("@%d", s) }
+func (s StackPointer) isOperand()     {}
+func (s StackPointer) isLocation()    {}
+func (s StackPointer) isPointer()     {}
