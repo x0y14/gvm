@@ -72,6 +72,17 @@ func (r *Runtime) hp() HeapAddress {
 	return r.registers[HP].(HeapAddress)
 }
 
+func (r *Runtime) calcOffset(offset Offset) int {
+	switch offset.(type) {
+	case BpOffset:
+		return int(r.bp()) + int(offset.(BpOffset))
+	case SpOffset:
+		return int(r.sp()) + int(offset.(SpOffset))
+	default:
+		panic("unknown offset")
+	}
+}
+
 func (r *Runtime) push(operand Operand) {
 	r.set(SP, r.sp()-1)
 	if r.sp() < 0 {
@@ -101,7 +112,11 @@ func (r *Runtime) do() error {
 			}
 			switch src.(type) {
 			case Register:
+				r.push(r.registers[src.(Register)])
+				return nil
 			case Offset:
+				r.push(r.stack[r.calcOffset(src.(Offset))])
+				return nil
 			case Immediate:
 				r.push(src)
 				return nil
