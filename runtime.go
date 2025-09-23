@@ -12,8 +12,8 @@ type Config struct {
 type Runtime struct {
 	program   Program
 	registers map[Register]Operand
-	stack     []Operand
-	heap      []Operand
+	stack     []Stockable
+	heap      []Stockable
 }
 
 func NewRuntime(program Program, config *Config) *Runtime {
@@ -35,8 +35,8 @@ func NewRuntime(program Program, config *Config) *Runtime {
 	return &Runtime{
 		program:   program,
 		registers: regs,
-		stack:     make([]Operand, config.StackSize),
-		heap:      make([]Operand, config.HeapSize),
+		stack:     make([]Stockable, config.StackSize),
+		heap:      make([]Stockable, config.HeapSize),
 	}
 }
 
@@ -83,28 +83,28 @@ func (r *Runtime) calcOffset(offset Offset) int {
 	}
 }
 
-func (r *Runtime) push(operand Operand) {
+func (r *Runtime) push(stockable Stockable) {
 	r.set(SP, r.sp()-1)
 	if r.sp() < 0 {
 		panic("stack overflow")
 	}
-	r.stack[r.sp()] = operand
+	r.stack[r.sp()] = stockable
 }
-func (r *Runtime) pop() Operand {
+func (r *Runtime) pop() Stockable {
 	v := r.stack[r.sp()]
 	r.stack[r.sp()] = nil
 	r.set(SP, r.sp()+1)
 	return v
 }
 
-func (r *Runtime) store(addr HeapAddress, operand Operand) {
+func (r *Runtime) store(addr HeapAddress, stockable Stockable) {
 	if 0 <= addr.Value() && addr.Value() < len(r.heap) {
-		r.heap[addr.Value()] = operand
+		r.heap[addr.Value()] = stockable
 		return
 	}
 	panic("heap: out of bounds") // 不法侵入
 }
-func (r *Runtime) load(addr HeapAddress) Operand {
+func (r *Runtime) load(addr HeapAddress) Stockable {
 	if 0 <= addr.Value() && addr.Value() < len(r.heap) {
 		return r.heap[addr.Value()]
 	}
@@ -140,13 +140,13 @@ func (r *Runtime) do() error {
 			case Offset:
 				switch src.(type) {
 				case Register:
-					r.stack[r.calcOffset(dst.(Offset))] = r.registers[src.(Register)]
+					r.stack[r.calcOffset(dst.(Offset))] = r.registers[src.(Register)].(Stockable)
 					return nil
 				case Offset:
 					r.stack[r.calcOffset(dst.(Offset))] = r.stack[r.calcOffset(src.(Offset))]
 					return nil
 				case Immediate:
-					r.stack[r.calcOffset(dst.(Offset))] = src
+					r.stack[r.calcOffset(dst.(Offset))] = src.(Stockable)
 					return nil
 				default:
 					return fmt.Errorf("unsupported mov src: %s", word.String())
@@ -162,13 +162,13 @@ func (r *Runtime) do() error {
 			}
 			switch src.(type) {
 			case Register:
-				r.push(r.registers[src.(Register)])
+				r.push(r.registers[src.(Register)].(Stockable))
 				return nil
 			case Offset:
 				r.push(r.stack[r.calcOffset(src.(Offset))])
 				return nil
 			case Immediate:
-				r.push(src)
+				r.push(src.(Stockable))
 				return nil
 			default:
 				return fmt.Errorf("unsupported push src: %s", src.String())
@@ -223,10 +223,10 @@ func (r *Runtime) do() error {
 			src := r.program[r.pc()+2]
 			switch src.(type) {
 			case Register:
-				r.store(HeapAddress(dstAddr), r.registers[src.(Register)])
+				r.store(HeapAddress(dstAddr), r.registers[src.(Register)].(Stockable))
 				return nil
 			case Immediate:
-				r.store(HeapAddress(dstAddr), src.(Immediate))
+				r.store(HeapAddress(dstAddr), src.(Stockable))
 				return nil
 			default:
 				return fmt.Errorf("unsupported store src: %s", src.String())

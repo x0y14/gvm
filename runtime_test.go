@@ -31,8 +31,8 @@ func TestRuntime_Run(t *testing.T) {
 					ACM2: nil,
 					ZF:   Bool(false),
 				},
-				stack: []Operand{nil, nil},
-				heap:  []Operand{nil, nil},
+				stack: []Stockable{nil, nil},
+				heap:  []Stockable{nil, nil},
 			},
 		},
 		{
@@ -56,8 +56,8 @@ func TestRuntime_Run(t *testing.T) {
 					ACM2: nil,
 					ZF:   Bool(false),
 				},
-				stack: []Operand{nil, nil},
-				heap:  []Operand{},
+				stack: []Stockable{nil, nil},
+				heap:  []Stockable{},
 			},
 		},
 		{
@@ -82,8 +82,8 @@ func TestRuntime_Run(t *testing.T) {
 					ACM2: nil,
 					ZF:   Bool(false),
 				},
-				stack: []Operand{nil, nil},
-				heap:  []Operand{},
+				stack: []Stockable{nil, nil},
+				heap:  []Stockable{},
 			},
 		},
 		{
@@ -111,8 +111,8 @@ func TestRuntime_Run(t *testing.T) {
 					ACM2: nil,
 					ZF:   Bool(false),
 				},
-				stack: []Operand{nil, nil, nil, nil},
-				heap:  []Operand{Integer(42), nil, nil, nil},
+				stack: []Stockable{nil, nil, nil, nil},
+				heap:  []Stockable{Integer(42), nil, nil, nil},
 			},
 		},
 	}
