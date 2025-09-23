@@ -7,6 +7,7 @@ import (
 
 type Operand interface {
 	Word
+	Value() int
 	isOperand()
 }
 
@@ -33,6 +34,7 @@ func (s SpecialRegister) String() string {
 		HP: "hp",
 	}[s]
 }
+func (s SpecialRegister) Value() int  { return int(s) }
 func (s SpecialRegister) isOperand()  {}
 func (s SpecialRegister) isRegister() {}
 
@@ -56,6 +58,7 @@ func (g GeneralPurposeRegister) String() string {
 		ACM2: "acm2",
 	}[g]
 }
+func (g GeneralPurposeRegister) Value() int  { return int(g) }
 func (g GeneralPurposeRegister) isOperand()  {}
 func (g GeneralPurposeRegister) isRegister() {}
 
@@ -71,6 +74,7 @@ func (f FlagRegister) String() string {
 		ZF: "zf",
 	}[f]
 }
+func (f FlagRegister) Value() int  { return int(f) }
 func (f FlagRegister) isOperand()  {}
 func (f FlagRegister) isRegister() {}
 
@@ -93,6 +97,7 @@ type Integer int
 func (i Integer) String() string {
 	return fmt.Sprintf("%d", i)
 }
+func (i Integer) Value() int          { return int(i) }
 func (i Integer) isOperand()          {}
 func (i Integer) Type() PrimitiveType { return TInteger }
 
@@ -101,6 +106,7 @@ type Char int
 func (c Char) String() string {
 	return strconv.QuoteRune(rune(c))
 }
+func (c Char) Value() int          { return int(c) }
 func (c Char) isOperand()          {}
 func (c Char) Type() PrimitiveType { return TChar }
 
@@ -111,6 +117,12 @@ func (b Bool) String() string {
 		return "true"
 	}
 	return "false"
+}
+func (b Bool) Value() int {
+	if b {
+		return 1
+	}
+	return 0
 }
 func (b Bool) isOperand()          {}
 func (b Bool) Type() PrimitiveType { return TBool }
@@ -136,6 +148,7 @@ func (b BpOffset) String() string {
 	}
 	return fmt.Sprintf("[bp%s%d]", op, b)
 }
+func (b BpOffset) Value() int  { return int(b) }
 func (b BpOffset) isOperand()  {}
 func (b BpOffset) isLocation() {}
 func (b BpOffset) isOffset()   {}
@@ -149,6 +162,7 @@ func (s SpOffset) String() string {
 	}
 	return fmt.Sprintf("[sp%s%d]", op, s)
 }
+func (s SpOffset) Value() int  { return int(s) }
 func (s SpOffset) isOperand()  {}
 func (s SpOffset) isLocation() {}
 func (s SpOffset) isOffset()   {}
@@ -164,6 +178,7 @@ type ProgramAddress int
 func (p ProgramAddress) String() string {
 	return fmt.Sprintf("@%d", p)
 }
+func (p ProgramAddress) Value() int  { return int(p) }
 func (p ProgramAddress) isOperand()  {}
 func (p ProgramAddress) isLocation() {}
 func (p ProgramAddress) isAddress()  {}
@@ -173,6 +188,7 @@ type HeapAddress int
 func (h HeapAddress) String() string {
 	return fmt.Sprintf("@%d", h)
 }
+func (h HeapAddress) Value() int  { return int(h) }
 func (h HeapAddress) isOperand()  {}
 func (h HeapAddress) isLocation() {}
 func (h HeapAddress) isAddress()  {}
@@ -184,6 +200,7 @@ type Pointer interface {
 type BasePointer int
 
 func (b BasePointer) String() string { return fmt.Sprintf("@%d", b) }
+func (b BasePointer) Value() int     { return int(b) }
 func (b BasePointer) isOperand()     {}
 func (b BasePointer) isLocation()    {}
 func (b BasePointer) isPointer()     {}
@@ -191,6 +208,7 @@ func (b BasePointer) isPointer()     {}
 type StackPointer int
 
 func (s StackPointer) String() string { return fmt.Sprintf("@%d", s) }
+func (s StackPointer) Value() int     { return int(s) }
 func (s StackPointer) isOperand()     {}
 func (s StackPointer) isLocation()    {}
 func (s StackPointer) isPointer()     {}
