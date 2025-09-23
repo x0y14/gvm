@@ -115,6 +115,60 @@ func TestRuntime_Run(t *testing.T) {
 				heap:  []Stockable{Integer(42), nil, nil, nil},
 			},
 		},
+		{
+			"add reg, reg",
+			[]Word{
+				PUSH, Integer(10),
+				POP, R1,
+				PUSH, Integer(5),
+				POP, R2,
+				ADD, R1, R2,
+			},
+			&Config{2, 0},
+			&Runtime{
+				program: nil,
+				registers: map[Register]Operand{
+					PC:   ProgramAddress(11),
+					BP:   BasePointer(0),
+					SP:   StackPointer(1),
+					HP:   HeapAddress(0),
+					R1:   Integer(15),
+					R2:   Integer(5),
+					R3:   nil,
+					ACM1: nil,
+					ACM2: nil,
+					ZF:   Bool(false),
+				},
+				stack: []Stockable{nil, nil},
+				heap:  []Stockable{},
+			},
+		},
+		{
+			"add reg, immediate",
+			[]Word{
+				PUSH, Integer(7),
+				POP, R1,
+				ADD, R1, Integer(3),
+			},
+			&Config{2, 0},
+			&Runtime{
+				program: nil,
+				registers: map[Register]Operand{
+					PC:   ProgramAddress(7),
+					BP:   BasePointer(0),
+					SP:   StackPointer(1),
+					HP:   HeapAddress(0),
+					R1:   Integer(10),
+					R2:   nil,
+					R3:   nil,
+					ACM1: nil,
+					ACM2: nil,
+					ZF:   Bool(false),
+				},
+				stack: []Stockable{nil, nil},
+				heap:  []Stockable{},
+			},
+		},
 	}
 
 	for _, tt := range tests {

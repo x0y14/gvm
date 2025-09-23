@@ -55,6 +55,37 @@ func (r *Runtime) Run() error {
 	return nil
 }
 
+func (r *Runtime) typecheck(o1, o2 Operand) bool {
+	switch o1.(type) {
+	case Register:
+		switch o2.(type) {
+		case Register:
+			return r.typecheck(r.registers[o1.(Register)], r.registers[o2.(Register)])
+		case Immediate:
+			return r.typecheck(r.registers[o1.(Register)], o2)
+		}
+	case Immediate:
+		switch o2.(type) {
+		case Register:
+			return r.typecheck(o2, r.registers[o2.(Register)])
+		case Immediate:
+			return o1.(Immediate).Type() == o2.(Immediate).Type()
+		}
+	}
+	return false
+}
+
+func (r *Runtime) isPretive(primitive PrimitiveType, operand Operand) bool {
+	switch operand.(type) {
+	case Register:
+		return r.isPretive(primitive, r.registers[operand.(Register)])
+	case Immediate:
+		return primitive == operand.(Immediate).Type()
+	default:
+		return false
+	}
+}
+
 func (r *Runtime) set(reg Register, operand Operand) {
 	r.registers[reg] = operand
 }
@@ -109,6 +140,28 @@ func (r *Runtime) load(addr HeapAddress) Stockable {
 		return r.heap[addr.Value()]
 	}
 	panic("heap: out of bounds")
+}
+
+func (r *Runtime) add(dst Register, src Operand) error {
+	// 一致チェック
+	if !r.typecheck(dst, src) {
+		return fmt.Errorf("typemismatch: %s + %s", dst.String(), src.String())
+	}
+	// 数字かどうかチェック
+	if !r.isPretive(TInteger, dst) {
+		return fmt.Errorf("invalid add value: %s", dst.String())
+	}
+	//
+	switch src.(type) {
+	case Register:
+		r.registers[dst] = Integer(r.registers[dst].(Integer).Value() + r.registers[src.(Register)].(Integer).Value())
+		return nil
+	case Integer:
+		r.registers[dst] = Integer(r.registers[dst].(Integer).Value() + src.(Integer).Value())
+		return nil
+	default:
+		return fmt.Errorf("unsupported add src: %s", src.String())
+	}
 }
 
 func (r *Runtime) do() error {
@@ -253,6 +306,23 @@ func (r *Runtime) do() error {
 			}
 			r.registers[dst] = r.load(HeapAddress(srcAddr))
 			return nil
+		case ADD:
+			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
+			dst := r.program[r.pc()+1]
+			src := r.program[r.pc()+2]
+			switch dst.(type) {
+			case Register:
+				switch src.(type) {
+				case Register:
+					return r.add(dst.(Register), r.registers[src.(Register)])
+				case Integer:
+					return r.add(dst.(Register), src.(Operand))
+				default:
+					return fmt.Errorf("unsupported add src: %s", src.String())
+				}
+			default:
+				return fmt.Errorf("unsupported add dst: %s", dst.String())
+			}
 		default:
 			return fmt.Errorf("unsupported opcode: %s", word.String())
 		}
