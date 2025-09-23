@@ -75,10 +75,10 @@ func (r *Runtime) typecheck(o1, o2 Operand) bool {
 	return false
 }
 
-func (r *Runtime) isPretive(primitive PrimitiveType, operand Operand) bool {
+func (r *Runtime) isPrimitive(primitive PrimitiveType, operand Operand) bool {
 	switch operand.(type) {
 	case Register:
-		return r.isPretive(primitive, r.registers[operand.(Register)])
+		return r.isPrimitive(primitive, r.registers[operand.(Register)])
 	case Immediate:
 		return primitive == operand.(Immediate).Type()
 	default:
@@ -148,7 +148,7 @@ func (r *Runtime) add(dst Register, src Operand) error {
 		return fmt.Errorf("typemismatch: %s + %s", dst.String(), src.String())
 	}
 	// 数字かどうかチェック
-	if !r.isPretive(TInteger, dst) {
+	if !r.isPrimitive(TInteger, dst) {
 		return fmt.Errorf("invalid add value: %s", dst.String())
 	}
 	//
