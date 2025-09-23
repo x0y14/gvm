@@ -86,6 +86,35 @@ func TestRuntime_Run(t *testing.T) {
 				heap:  []Operand{},
 			},
 		},
+		{
+			"alloc, store, load",
+			[]Word{
+				ALLOC, Integer(1), // ヒープに1つ分確保、base addrをpush
+				POP, R1, // base addrをR1にpop
+				PUSH, Integer(42), // 42をpush
+				POP, R2, // R2にpop
+				STORE, R1, R2, // R1(addr)にR2の値(42)をstore
+				LOAD, R3, R1, // R1(addr)からloadしてR3へ
+			},
+			&Config{4, 4},
+			&Runtime{
+				program: nil,
+				registers: map[Register]Operand{
+					PC:   ProgramAddress(14),
+					BP:   BasePointer(0),
+					SP:   StackPointer(3),
+					HP:   HeapAddress(1),
+					R1:   HeapAddress(0),
+					R2:   Integer(42),
+					R3:   Integer(42),
+					ACM1: nil,
+					ACM2: nil,
+					ZF:   Bool(false),
+				},
+				stack: []Operand{nil, nil, nil, nil},
+				heap:  []Operand{Integer(42), nil, nil, nil},
+			},
+		},
 	}
 
 	for _, tt := range tests {

@@ -97,6 +97,20 @@ func (r *Runtime) pop() Operand {
 	return v
 }
 
+func (r *Runtime) store(addr HeapAddress, operand Operand) {
+	if 0 <= addr.Value() && addr.Value() < len(r.heap) {
+		r.heap[addr.Value()] = operand
+		return
+	}
+	panic("heap: out of bounds") // 不法侵入
+}
+func (r *Runtime) load(addr HeapAddress) Operand {
+	if 0 <= addr.Value() && addr.Value() < len(r.heap) {
+		return r.heap[addr.Value()]
+	}
+	panic("heap: out of bounds")
+}
+
 func (r *Runtime) do() error {
 	switch word := r.program[r.pc()].(type) {
 	case Opcode:
@@ -138,7 +152,7 @@ func (r *Runtime) do() error {
 					return fmt.Errorf("unsupported mov src: %s", word.String())
 				}
 			default:
-				return fmt.Errorf("unsupported mov dst: %s", word.String())
+				return fmt.Errorf("unsupported mov dstAddr: %s", word.String())
 			}
 		case PUSH:
 			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
@@ -163,15 +177,82 @@ func (r *Runtime) do() error {
 			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
 			dst, ok := r.program[r.pc()+1].(Operand)
 			if !ok {
-				return fmt.Errorf("invalid pop dst: want=operand, got=%s", word.String())
+				return fmt.Errorf("invalid pop dstAddr: want=operand, got=%s", word.String())
 			}
 			switch dst := dst.(type) {
 			case Register:
 				r.registers[dst] = r.pop()
 				return nil
 			default:
-				return fmt.Errorf("invalid pop dst: %s", word.String())
+				return fmt.Errorf("invalid pop dstAddr: %s", word.String())
 			}
+		case ALLOC:
+			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
+			var size int
+			switch op := r.program[r.pc()+1].(type) {
+			case Register:
+				size = r.registers[op.(Register)].Value()
+			case Integer:
+				size = op.Value()
+			default:
+				return fmt.Errorf("heap: invalid alloc size: %s", op.String())
+			}
+			if len(r.heap) <= r.hp().Value()+size {
+				panic("heap: out of memory")
+			}
+			base := r.hp()
+			r.set(HP, HeapAddress(r.hp().Value()+size))
+			r.push(base)
+			return nil
+		case STORE:
+			// Store DstHeapAddr Src
+			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
+			dst := r.program[r.pc()+1]
+			var dstAddr int
+			switch op := dst.(type) {
+			case Register:
+				dstAddr = r.registers[op.(Register)].Value()
+			case HeapAddress:
+				dstAddr = op.Value()
+			default:
+				return fmt.Errorf("heap: invalid store dst: %s", dst.String())
+			}
+			if dstAddr < 0 || len(r.heap) <= dstAddr {
+				panic("heap: memory access out of bounds")
+			}
+			src := r.program[r.pc()+2]
+			switch src.(type) {
+			case Register:
+				r.store(HeapAddress(dstAddr), r.registers[src.(Register)])
+				return nil
+			case Immediate:
+				r.store(HeapAddress(dstAddr), src.(Immediate))
+				return nil
+			default:
+				return fmt.Errorf("unsupported store src: %s", src.String())
+			}
+		case LOAD:
+			// Load Dst SrcHeapAddr
+			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
+			dst, ok := r.program[r.pc()+1].(Register)
+			if !ok {
+				return fmt.Errorf("heap: invalid load dst: %s", dst.String())
+			}
+			src := r.program[r.pc()+2]
+			var srcAddr int
+			switch op := src.(type) {
+			case Register:
+				srcAddr = r.registers[op.(Register)].Value()
+			case Immediate:
+				srcAddr = op.Value()
+			default:
+				return fmt.Errorf("heap: invalid load src: %s", src.String())
+			}
+			if srcAddr < 0 || len(r.heap) <= srcAddr {
+				panic("heap: memory access out of bounds")
+			}
+			r.registers[dst] = r.load(HeapAddress(srcAddr))
+			return nil
 		default:
 			return fmt.Errorf("unsupported opcode: %s", word.String())
 		}
