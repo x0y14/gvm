@@ -167,6 +167,20 @@ func (s SpOffset) isOperand()  {}
 func (s SpOffset) isLocation() {}
 func (s SpOffset) isOffset()   {}
 
+type ProgramOffset int // labelの代わり
+
+func (p ProgramOffset) String() string {
+	var op = ""
+	if p >= 0 {
+		op = "+"
+	}
+	return fmt.Sprintf("%s%d", op, p)
+}
+func (p ProgramOffset) Value() int  { return int(p) }
+func (p ProgramOffset) isOperand()  {}
+func (p ProgramOffset) isLocation() {}
+func (p ProgramOffset) isOffset()   {}
+
 // Address Abstract Location
 type Address interface {
 	Location
