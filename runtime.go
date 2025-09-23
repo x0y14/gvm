@@ -41,7 +41,7 @@ func NewRuntime(program Program, config *Config) *Runtime {
 }
 
 func (r *Runtime) Run() error {
-	for int(r.pc()) < len(r.program) {
+	for r.pc().Value() < len(r.program) {
 		switch word := r.program[r.pc()]; word.(type) {
 		case Opcode:
 			err := r.do()
@@ -75,9 +75,9 @@ func (r *Runtime) hp() HeapAddress {
 func (r *Runtime) calcOffset(offset Offset) int {
 	switch offset.(type) {
 	case BpOffset:
-		return int(r.bp()) + int(offset.(BpOffset))
+		return r.bp().Value() + offset.(BpOffset).Value()
 	case SpOffset:
-		return int(r.sp()) + int(offset.(SpOffset))
+		return r.sp().Value() + offset.(SpOffset).Value()
 	default:
 		panic("unknown offset")
 	}
