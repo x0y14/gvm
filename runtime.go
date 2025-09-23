@@ -41,10 +41,13 @@ func NewRuntime(program Program, config *Config) *Runtime {
 }
 
 func (r *Runtime) Run() error {
-	for _, word := range r.program {
-		switch word.(type) {
+	for int(r.pc()) < len(r.program) {
+		switch word := r.program[r.pc()]; word.(type) {
 		case Opcode:
-			return r.do()
+			err := r.do()
+			if err != nil {
+				return err
+			}
 		default:
 			return fmt.Errorf("unsupported word: %s", word.String())
 		}
