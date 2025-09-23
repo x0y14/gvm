@@ -104,6 +104,42 @@ func (r *Runtime) do() error {
 		case NOP:
 			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
 			return nil
+		case MOV:
+			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
+			dst := r.program[r.pc()+1].(Operand)
+			src := r.program[r.pc()+2].(Operand)
+			switch dst.(type) {
+			case Register: // ex) mov r1, ??
+				switch src.(type) {
+				case Register:
+					r.registers[dst.(Register)] = r.registers[src.(Register)]
+					return nil
+				case Offset:
+					r.registers[dst.(Register)] = r.stack[r.calcOffset(src.(Offset))]
+					return nil
+				case Immediate:
+					r.registers[dst.(Register)] = src
+					return nil
+				default:
+					return fmt.Errorf("unsupported mov src: %s", word.String())
+				}
+			case Offset:
+				switch src.(type) {
+				case Register:
+					r.stack[r.calcOffset(dst.(Offset))] = r.registers[src.(Register)]
+					return nil
+				case Offset:
+					r.stack[r.calcOffset(dst.(Offset))] = r.stack[r.calcOffset(src.(Offset))]
+					return nil
+				case Immediate:
+					r.stack[r.calcOffset(dst.(Offset))] = src
+					return nil
+				default:
+					return fmt.Errorf("unsupported mov src: %s", word.String())
+				}
+			default:
+				return fmt.Errorf("unsupported mov dst: %s", word.String())
+			}
 		case PUSH:
 			defer func() { r.set(PC, r.pc()+1+ProgramAddress(word.NumOperands())) }()
 			src, ok := r.program[r.pc()+1].(Operand)

@@ -60,6 +60,32 @@ func TestRuntime_Run(t *testing.T) {
 				heap:  []Operand{},
 			},
 		},
+		{
+			"mov",
+			[]Word{
+				PUSH, Integer(99),
+				POP, R3,
+				MOV, R1, R3,
+			},
+			&Config{2, 0},
+			&Runtime{
+				program: nil,
+				registers: map[Register]Operand{
+					PC:   ProgramAddress(7),
+					BP:   BasePointer(0),
+					SP:   StackPointer(1),
+					HP:   HeapAddress(0),
+					R1:   Integer(99),
+					R2:   nil,
+					R3:   Integer(99),
+					ACM1: nil,
+					ACM2: nil,
+					ZF:   Bool(false),
+				},
+				stack: []Operand{nil, nil},
+				heap:  []Operand{},
+			},
+		},
 	}
 
 	for _, tt := range tests {
