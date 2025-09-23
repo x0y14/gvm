@@ -154,10 +154,25 @@ func (s SpOffset) isLocation() {}
 func (s SpOffset) isOffset()   {}
 
 // Address Abstract Location
-type Address int
-
-func (a Address) String() string {
-	return fmt.Sprintf("@%d", a)
+type Address interface {
+	Location
+	isAddress()
 }
-func (a Address) isOperand()  {}
-func (a Address) isLocation() {}
+
+type ProgramAddress int
+
+func (p ProgramAddress) String() string {
+	return fmt.Sprintf("@%d", p)
+}
+func (p ProgramAddress) isOperand()  {}
+func (p ProgramAddress) isLocation() {}
+func (p ProgramAddress) isAddress()  {}
+
+type HeapAddress int
+
+func (h HeapAddress) String() string {
+	return fmt.Sprintf("@%d", h)
+}
+func (h HeapAddress) isOperand()  {}
+func (h HeapAddress) isLocation() {}
+func (h HeapAddress) isAddress()  {}
