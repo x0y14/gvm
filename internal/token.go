@@ -26,6 +26,8 @@ const (
 
 	Lrb // (
 	Rrb // )
+	Lcb // [
+	Rcb // ]
 
 	Dot   // .
 	Comma // ,
@@ -127,7 +129,7 @@ func integer() (*Token, error) {
 }
 
 func isSymbol(r rune) bool {
-	return r == '(' || r == ')' ||
+	return r == '(' || r == ')' || r == '[' || r == ']' ||
 		r == '.' || r == ',' || r == ':' ||
 		r == '+' || r == '-' || r == '*'
 }
@@ -136,6 +138,8 @@ func symbol() (*Token, error) {
 	sym := map[rune]Token{
 		'(': {Kind: Lrb},
 		')': {Kind: Rrb},
+		'[': {Kind: Lcb},
+		']': {Kind: Rcb},
 		'.': {Kind: Dot},
 		',': {Kind: Comma},
 		':': {Kind: Colon},
