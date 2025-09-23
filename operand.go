@@ -78,15 +78,6 @@ func (f FlagRegister) Value() int  { return int(f) }
 func (f FlagRegister) isOperand()  {}
 func (f FlagRegister) isRegister() {}
 
-type PrimitiveType int
-
-const (
-	_ PrimitiveType = iota
-	TInteger
-	TChar
-	TBool
-)
-
 type Immediate interface {
 	Operand
 	Type() PrimitiveType
