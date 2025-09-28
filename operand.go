@@ -11,11 +11,6 @@ type Operand interface {
 	isOperand()
 }
 
-type Stockable interface {
-	Operand
-	isStockable()
-}
-
 type Register interface {
 	Operand
 	isRegister()
@@ -95,7 +90,6 @@ func (i Integer) String() string {
 }
 func (i Integer) Value() int          { return int(i) }
 func (i Integer) isOperand()          {}
-func (i Integer) isStockable()        {}
 func (i Integer) Type() PrimitiveType { return TInteger }
 
 type Char int
@@ -105,7 +99,6 @@ func (c Char) String() string {
 }
 func (c Char) Value() int          { return int(c) }
 func (c Char) isOperand()          {}
-func (c Char) isStockable()        {}
 func (c Char) Type() PrimitiveType { return TChar }
 
 type Bool bool
@@ -123,7 +116,6 @@ func (b Bool) Value() int {
 	return 0
 }
 func (b Bool) isOperand()          {}
-func (b Bool) isStockable()        {}
 func (b Bool) Type() PrimitiveType { return TBool }
 
 type Location interface {
@@ -201,11 +193,10 @@ type HeapAddress int
 func (h HeapAddress) String() string {
 	return fmt.Sprintf("@%d", h)
 }
-func (h HeapAddress) Value() int   { return int(h) }
-func (h HeapAddress) isOperand()   {}
-func (h HeapAddress) isStockable() {}
-func (h HeapAddress) isLocation()  {}
-func (h HeapAddress) isAddress()   {}
+func (h HeapAddress) Value() int  { return int(h) }
+func (h HeapAddress) isOperand()  {}
+func (h HeapAddress) isLocation() {}
+func (h HeapAddress) isAddress()  {}
 
 type Pointer interface {
 	Location
