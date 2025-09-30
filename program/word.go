@@ -1,4 +1,4 @@
-package gvm
+package program
 
 type Word interface {
 	String() string

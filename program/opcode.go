@@ -1,4 +1,4 @@
-package gvm
+package program
 
 type Opcode int
 
