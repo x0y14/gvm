@@ -18,7 +18,7 @@ type Runtime struct {
 	heap      []word.Storable
 }
 
-func NewRuntime(prog []word.Word, config *Config) *Runtime {
+func NewRuntime(program []word.Word, config *Config) *Runtime {
 	regs := map[word.Register]word.Storable{
 		// Specials
 		word.PC: word.Address(0),
@@ -35,7 +35,7 @@ func NewRuntime(prog []word.Word, config *Config) *Runtime {
 		word.ZF: word.Bool(false),
 	}
 	return &Runtime{
-		program:   word,
+		program:   program,
 		registers: regs,
 		stack:     make([]word.Storable, config.StackSize),
 		heap:      make([]word.Storable, config.HeapSize),
