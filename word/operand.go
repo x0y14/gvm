@@ -1,4 +1,4 @@
-package program
+package word
 
 type Operand interface {
 	Word

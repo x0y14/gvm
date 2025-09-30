@@ -1,4 +1,4 @@
-package program
+package word
 
 type Storable interface {
 	Operand

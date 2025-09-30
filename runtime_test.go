@@ -16,7 +16,7 @@ func TestRuntime_Run(t *testing.T) {
 	//		[]Word{},
 	//		&Config{2, 2},
 	//		&Runtime{
-	//			program: nil,
+	//			word: nil,
 	//			registers: map[Register]Operand{
 	//				PC:   ProgramAddress(0),
 	//				BP:   BasePointer(0),
@@ -41,7 +41,7 @@ func TestRuntime_Run(t *testing.T) {
 	//		},
 	//		&Config{2, 0},
 	//		&Runtime{
-	//			program: nil,
+	//			word: nil,
 	//			registers: map[Register]Operand{
 	//				PC:   ProgramAddress(4),
 	//				BP:   BasePointer(0),
@@ -67,7 +67,7 @@ func TestRuntime_Run(t *testing.T) {
 	//		},
 	//		&Config{2, 0},
 	//		&Runtime{
-	//			program: nil,
+	//			word: nil,
 	//			registers: map[Register]Operand{
 	//				PC:   ProgramAddress(7),
 	//				BP:   BasePointer(0),
@@ -96,7 +96,7 @@ func TestRuntime_Run(t *testing.T) {
 	//		},
 	//		&Config{4, 4},
 	//		&Runtime{
-	//			program: nil,
+	//			word: nil,
 	//			registers: map[Register]Operand{
 	//				PC:   ProgramAddress(14),
 	//				BP:   BasePointer(0),
@@ -124,7 +124,7 @@ func TestRuntime_Run(t *testing.T) {
 	//		},
 	//		&Config{2, 0},
 	//		&Runtime{
-	//			program: nil,
+	//			word: nil,
 	//			registers: map[Register]Operand{
 	//				PC:   ProgramAddress(11),
 	//				BP:   BasePointer(0),
@@ -150,7 +150,7 @@ func TestRuntime_Run(t *testing.T) {
 	//		},
 	//		&Config{2, 0},
 	//		&Runtime{
-	//			program: nil,
+	//			word: nil,
 	//			registers: map[Register]Operand{
 	//				PC:   ProgramAddress(7),
 	//				BP:   BasePointer(0),
@@ -177,7 +177,7 @@ func TestRuntime_Run(t *testing.T) {
 	//			t.Error(err)
 	//		}
 	//
-	//		tt.result.program = tt.prog
+	//		tt.result.word = tt.prog
 	//		if diff := cmp.Diff(tt.result, r, cmp.AllowUnexported(Runtime{})); diff != "" {
 	//			t.Errorf("diff: %s", diff)
 	//		}
