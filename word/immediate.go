@@ -7,6 +7,7 @@ import (
 
 type Immediate interface {
 	Operand
+	isStorable()
 }
 
 type Integer int
