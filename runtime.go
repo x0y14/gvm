@@ -83,24 +83,25 @@ func (r *Runtime) pop() word.Storable {
 	return v
 }
 
-func (r *Runtime) alloc(size int) word.Address {
+func (r *Runtime) alloc(size int) {
 	baseAddr := r.hp()
 	if len(r.heap) <= int(r.hp())+size {
 		panic("heap: out of memory")
 	}
 	r.setSpecial(word.HP, word.Address(int(r.hp())+size))
-	return baseAddr
+	r.push(baseAddr)
 }
-func (r *Runtime) store(addr word.Address, storable word.Storable) {
-	if 0 <= int(addr) && int(addr) < len(r.heap) {
-		r.heap[addr] = storable
+func (r *Runtime) store(dst word.Address, src word.Storable) {
+	if 0 <= int(dst) && int(dst) < len(r.heap) {
+		r.heap[dst] = src
 		return
 	}
 	panic("heap: out of bounds") // 不法侵入
 }
-func (r *Runtime) load(addr word.Address) word.Storable {
-	if 0 <= int(addr) && int(addr) < len(r.heap) {
-		return r.heap[addr]
+func (r *Runtime) load(dst word.Register, src word.Address) {
+	if 0 <= int(src) && int(src) < len(r.heap) {
+		r.registers[dst] = r.heap[src]
+		return
 	}
 	panic("heap: out of bounds")
 }
@@ -168,7 +169,7 @@ func (r *Runtime) sub(dst word.Register, src word.Immediate) error {
 	}
 }
 
-func (r *Runtime) mov(dst word.Register, src word.Immediate) error {
+func (r *Runtime) mov(dst word.Register, src word.Storable) error {
 	switch dst.(type) {
 	case word.SpecialRegister, word.GeneralPurposeRegister:
 		// src がレジスタの場合：レジスタの値をコピー
@@ -281,8 +282,48 @@ func (r *Runtime) exec() error {
 			}
 		case word.ALLOC:
 			defer func() { r.setSpecial(word.PC, word.Address(int(r.pc())+1+w.NumOperands())) }()
+			var size word.Integer
+			op := r.program[r.pc()+1]
+			switch op.(type) {
+			case word.Register:
+				size = r.registers[op.(word.Register)].(word.Integer)
+			case word.Offset:
+				s, err := r.solve(op.(word.Offset))
+				if err != nil {
+					return err
+				}
+				size = s.(word.Integer)
+			case word.Integer:
+				size = op.(word.Integer)
+			default:
+				return fmt.Errorf("unsupported alloc size: %s", op.String())
+			}
+			r.alloc(size.Value())
+			return nil
 		case word.STORE:
 			defer func() { r.setSpecial(word.PC, word.Address(int(r.pc())+1+w.NumOperands())) }()
+			dst := r.program[r.pc()+1]
+			src := r.program[r.pc()+2]
+			if _, ok := dst.(word.Address); !ok {
+				return fmt.Errorf("unsupported store dst: %s", dst.String())
+			}
+			if _, ok := src.(word.Storable); !ok {
+				return fmt.Errorf("unsupported store src: %s", src.String())
+			}
+			r.store(dst.(word.Address), src.(word.Storable))
+			return nil
+		case word.LOAD:
+			defer func() { r.setSpecial(word.PC, word.Address(int(r.pc())+1+w.NumOperands())) }()
+			dst := r.program[r.pc()+1]
+			src := r.program[r.pc()+2]
+			if _, ok := dst.(word.Address); !ok {
+				return fmt.Errorf("unsupported load dst: %s", dst.String())
+			}
+			if _, ok := src.(word.Address); !ok {
+				return fmt.Errorf("unsupported load src: %s", src.String())
+			}
+			r.load(dst.(word.Register), src.(word.Address))
+			return nil
 		case word.CALL:
 		case word.RET:
 		case word.ADD:
